@@ -1,7 +1,7 @@
  
 #include "mbed.h"
 
-// Initialize a pins to perform analog input and digital output fucntions
+// Pins utilizados
 AnalogIn   ain(p15);
 DigitalOut dout1(LED1);
 DigitalOut dout2(LED2);
@@ -19,9 +19,12 @@ int main(void) {
 
         value = ain;
 
+		//Actualiza el mayor valor detectado
         if (value > maxi){
             maxi = value;
         }
+
+		//Prende los diferentes leds tomando en cuenta sus rangos
 
         if(value > maxi * 0.2f) {
             dout1 = 1;
