@@ -9,6 +9,10 @@ DigitalOut myled2(LED2);
 DigitalOut myled3(LED3);
 DigitalOut myled4(LED4);
 
+#define Stop 0 
+#define AntiHorario 1 
+#define Horario 2 
+int estado = 0;
 
 struct Component {
     Motor *motor;
@@ -20,6 +24,7 @@ struct Component {
     float last;
 };
 
+void encender_led_i(int i);
 void secuencia_1_leds();
 
 void mover_horario(Component *component);
@@ -35,6 +40,8 @@ void ajustar_rotacion(Component *holobot);
 
 
 float speedTest = 0.3f;
+float currentDistSum = 0.0f;
+float ajusteRotacion = 1.2f;
 
 int main() {
     
@@ -76,10 +83,6 @@ int main() {
     Component holobot[3];
 
     secuencia_1_leds();
-    
-    float actualA1i = 0.0f;
-    float actualA2i = 0.0f;
-    float actualA3i = 0.0f;
  
     holobot[0].motor = &m1;
     holobot[0].dira = &dir1a;
@@ -87,7 +90,17 @@ int main() {
     holobot[0].a = &a1;
     holobot[0].initial = a1.read();
 
+    holobot[1].motor = &m2;
+    holobot[1].dira = &dir2a;
+    holobot[1].dirh = &dir2h;
+    holobot[1].a = &a2;
+    holobot[1].initial = a2.read();
 
+    holobot[2].motor = &m3;
+    holobot[2].dira = &dir3a;
+    holobot[2].dirh = &dir3h;
+    holobot[2].a = &a3;
+    holobot[2].initial = a3.read();
 
     while(1) {
         
@@ -95,15 +108,57 @@ int main() {
         holobot[1].current = a2.read();
         holobot[2].current = a3.read();
         
-        if (holobot[0].current > holobot[0].last && holobot[1].current > holobot[1].last && holobot[2].current > holobot[2].last){
+        float ajusteSup = 0.0f;
+        float ajusteInf = 0.0f;
+        
+       // if (holobot[0].current > holobot[0].last && holobot[1].current > holobot[1].last && holobot[2].current > holobot[2].last){
+        if (holobot[0].current >= holobot[0].initial*ajusteRotacion &&
+            holobot[1].current >= holobot[1].initial*ajusteRotacion &&
+            holobot[2].current >= holobot[2].initial*ajusteRotacion){
             //logica rotar
-            float current = holobot[0].current + holobot[1].current + holobot[2].current;             
+            if (estado == Stop){
+                encender_led_i(1);                
+                estado = Horario;
+                rotar_horario(holobot);
+            } else if (estado == AntiHorario) {
+                encender_led_i(2);
+                currentDistSum = holobot[0].current + holobot[1].current + holobot[2].current;
+                if (holobot[0].current > holobot[0].last*ajusteRotacion && 
+                    holobot[1].current > holobot[1].last*ajusteRotacion && 
+                    holobot[2].current > holobot[2].last*ajusteRotacion){
+                    estado = Horario;
+                    rotar_horario(holobot);
+                } else {
+                    estado = AntiHorario;
+                    rotar_anti_horario(holobot);
+                }
+            } else if (estado == Horario ) {
+                encender_led_i(3);
+                if (holobot[0].current > holobot[0].last*ajusteRotacion && 
+                    holobot[1].current > holobot[1].last*ajusteRotacion && 
+                    holobot[2].current > holobot[2].last*ajusteRotacion){
+                    estado = AntiHorario;
+                    rotar_anti_horario(holobot);
+                } else {
+                    estado = Horario;
+                    rotar_horario(holobot);
+                }
+            }
+        } else if (holobot[0].current < holobot[0].initial*ajusteRotacion &&
+                   holobot[1].current < holobot[1].initial*ajusteRotacion &&
+                   holobot[2].current < holobot[2].initial*ajusteRotacion &&
+                   holobot[0].current >= holobot[0].initial &&
+                   holobot[1].current >= holobot[1].initial &&
+                   holobot[2].current >= holobot[2].initial ) {
+                       
+            estado = Stop;
+            encender_led_i(1);
+            parar_motores(holobot);
             
         } else {
-        
-            mantener_distancia(1, holobot);
+            /* mantener_distancia(1, holobot);
             mantener_distancia(2, holobot);
-            mantener_distancia(3, holobot);
+            mantener_distancia(3, holobot);*/
         }
         
         holobot[0].last = holobot[0].current;
@@ -132,6 +187,30 @@ void secuencia_1_leds(){
     myled1 = 0;
     wait(0.2f);
     
+}
+
+void encender_led_i(int i){
+    if (i == 1){
+        myled1 = 1;
+        myled2 = 0;
+        myled3 = 0;
+        myled4 = 0;
+    } else if (i == 2){
+        myled1 = 0;
+        myled2 = 1;
+        myled3 = 0;
+        myled4 = 0;
+    } else if (i == 3){
+        myled1 = 0;
+        myled2 = 0;
+        myled3 = 1;
+        myled4 = 0;
+    } else if (i == 4){
+        myled1 = 0;
+        myled2 = 0;
+        myled3 = 0;
+        myled4 = 1;
+    }   
 }
 
 void mover_horario(Component *component) {
