@@ -41,17 +41,21 @@ int in(float last, float current);
 void update_initial(Component *holobot);
 
 
+float TIME_INTENSITY =  7.0f;
+float AJUSTE_INTENSITY = 1.5f;
+
 float speedTest = 0.3f;
 
-float AJUSTE = 0.03f;
-float AJUSTE_STEP = 0.0025f;
-float MIN_AJUSTE = 0.01f + AJUSTE_STEP;
-float MAX_AJUSTE = 0.035f - AJUSTE_STEP;
+float AJUSTE = 0.03f * AJUSTE_INTENSITY;
+float AJUSTE_STEP = 0.0025f * AJUSTE_INTENSITY;
+float MIN_AJUSTE = 0.01f * AJUSTE_INTENSITY + AJUSTE_STEP;
+float MAX_AJUSTE = 0.035f * AJUSTE_INTENSITY - AJUSTE_STEP;
 
-float DEFAULT_AJUSTE_GIRO = 0.04f;
+float DEFAULT_AJUSTE_GIRO = 0.04f * AJUSTE_INTENSITY;
 float AJUSTE_GIRO = DEFAULT_AJUSTE_GIRO;
+float AJUSTE_GIRO_CORTO = 0.02f * AJUSTE_INTENSITY;
 
-float MOVEMENT_TIME = 0.005f;
+float MOVEMENT_TIME = 0.005f * TIME_INTENSITY;
 
 int main() {
 
@@ -144,7 +148,7 @@ int main() {
 
         if (jail_rotating(holobot)){
             //logica rotar
-            AJUSTE_GIRO = 0.02f;
+            AJUSTE_GIRO = AJUSTE_GIRO_CORTO;
             float current, attempt;
             int mode = 1;
             myled3 = !myled3;
