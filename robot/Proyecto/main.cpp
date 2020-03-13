@@ -1,3 +1,10 @@
+/*
+Integrantes:
+
+Daniel Serena Sanz              e299571
+Juan Andres Escalante Rodriguez e388792
+*/
+
 #include "mbed.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -44,7 +51,7 @@ void update_initial(Component *holobot);
 float TIME_INTENSITY =  7.0f;
 float AJUSTE_INTENSITY = 1.5f;
 
-float speedTest = 0.3f;
+float speedTest = 0.45f;
 
 float AJUSTE = 0.03f * AJUSTE_INTENSITY;
 float AJUSTE_STEP = 0.0025f * AJUSTE_INTENSITY;
@@ -329,7 +336,7 @@ void mover_horario(Component *component) {
 }
 
 void mover_anti_horario(Component *component){
-    component->motor->speed(2.5f * speedTest);
+    component->motor->speed(speedTest);
     DigitalOut *da = component->dira;
     *da = 1;
     DigitalOut *dh = component->dirh;
